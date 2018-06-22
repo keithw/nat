@@ -17,6 +17,8 @@ Makefile.in
 /stamp-h1
 /examples/tcpclient
 /examples/tcpserver
+/examples/natclient
+/examples/natserver
 /compile
 /datagrump/sender
 /datagrump/receiver
