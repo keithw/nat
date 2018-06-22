@@ -18,9 +18,9 @@ int main()
       sockets.at( i ).bind( Address( "0", 60000 + i ) );
       poller.add_action( Action( sockets.at( i ),
 				 Direction::In,
-				 [&] () {
+				 [i, &sockets] () {
 				   auto rec = sockets.at( i ).recv();
-				   cout << "UDP datagram from " << rec.source_address.to_string();
+				   cout << "UDP datagram from " << rec.source_address.to_string() << "\n";
 				   return ResultType::Continue;
 				 } ) );
     }
