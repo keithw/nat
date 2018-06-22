@@ -13,14 +13,15 @@ int main()
   try {
     Poller poller;
     vector<UDPSocket> sockets( 16 );
-
+    unsigned int count = 0;
+    
     for ( unsigned int i = 0; i < 16; i++ ) {
       sockets.at( i ).bind( Address( "0", 60000 + i ) );
       poller.add_action( Action( sockets.at( i ),
 				 Direction::In,
-				 [i, &sockets] () {
+				 [i, &sockets, &count] () {
 				   auto rec = sockets.at( i ).recv();
-				   cout << "UDP datagram from " << rec.source_address.to_string() << "\n";
+				   cout << count++ << "\tUDP datagram from " << rec.source_address.to_string() << "\n";
 				   return ResultType::Continue;
 				 } ) );
     }

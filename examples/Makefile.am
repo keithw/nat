@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(CXX11_FLAGS) -I$(srcdir)/../src
+AM_CPPFLAGS = $(CXX14_FLAGS) -I$(srcdir)/../src
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 LDADD = ../src/libsourdough.a -lpthread
 
