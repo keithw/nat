@@ -19,6 +19,8 @@ Makefile.in
 /examples/tcpserver
 /examples/natclient
 /examples/natserver
+/examples/echoserver
 /compile
 /datagrump/sender
 /datagrump/receiver
+/.vscode/
