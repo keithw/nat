@@ -1,3 +1,5 @@
+/* -*-mode:c++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+
 #include <vector>
 #include <iostream>
 #include <thread>
@@ -24,7 +26,7 @@ int main( int argc, char *argv[] )
       const Address dest( argv[ i ], 60000 );
       cerr << "Sending to " << dest.to_string() << "... ";
       socket.sendto( Address( argv[ i ], 60000 ),
-		     "Hello, Dima." );
+                     "Hello, Dima." );
       cerr << "done.\n";
       this_thread::sleep_for( 50ms );
     }
