@@ -1,3 +1,5 @@
+/* -*-mode:c++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+
 #include <vector>
 #include <iostream>
 
@@ -8,19 +10,18 @@
 using namespace std;
 using namespace PollerShortNames;
 
-Address self_external_address(const Address& echo_server, UDPSocket* socket) 
+Address self_external_address(const Address& echo_server, UDPSocket & socket) 
 {
-  socket->sendto( echo_server, "ping" );
-  auto echo = socket->recv().payload;
+  socket.sendto( echo_server, "ping" );
+  auto echo = socket.recv().payload;
   size_t pos = echo.find(":");
   if (pos == string::npos) {
     throw runtime_error( string("bad echo response ") + echo );
   }
   auto ip = echo.substr(0, pos);
-  auto port = atoi(echo.substr(pos + 1, string::npos).c_str());
-  return Address(ip, port);
+  auto port = echo.substr(pos + 1, string::npos);
+  return { ip, port };
 }
-
 
 int main(int argc, char** argv)
 {
@@ -41,27 +42,25 @@ int main(int argc, char** argv)
     Poller poller;
 
     UDPSocket socket;
-    socket.bind( Address( "0", argv[LISTENING_PORT]) );
+    socket.bind( { "0", argv[LISTENING_PORT] } );
 
-    auto external = self_external_address( 
-      Address( argv[ECHO_SERVER_IP], atoi(argv[ECHO_SERVER_PORT] ) ), 
-      &socket);
+    const auto external = self_external_address( { argv[ECHO_SERVER_IP], argv[ECHO_SERVER_PORT] },
+                                                 socket);
     cout << "Self external address: " << external.to_string() << endl;
 
     poller.add_action( Action( socket,
-				 Direction::In,
-				 [&socket] () {
-				   auto rec = socket.recv();
-				   cout << "UDP datagram from " << rec.source_address.to_string() << "\n";
-           socket.sendto(rec.source_address, "Hello From Server!");
-				   return ResultType::Continue;
-				 } ) );
-
+                               Direction::In,
+                               [&socket] () {
+                                 auto rec = socket.recv();
+                                 cout << "UDP datagram from " << rec.source_address.to_string() << "\n";
+                                 socket.sendto(rec.source_address, "Hello From Server!");
+                                 return ResultType::Continue;
+                               } ) );
 
     while ( true ) {
       const auto ret = poller.poll( -1 );
       if ( ret.result == PollResult::Exit ) {
-	      return ret.exit_status;
+        return ret.exit_status;
       }
     }
   } catch ( const exception & e ) {
