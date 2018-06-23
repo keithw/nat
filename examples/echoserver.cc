@@ -10,25 +10,30 @@
 using namespace std;
 using namespace PollerShortNames;
 
-int main(int argc, char** argv)
+int main()
 {
   try {
-    Poller poller;
-    UDPSocket socket;
-    uint16_t port = 60000;
-    if ( argc > 1 ) {
-      port = stoi(argv[1]);
+    vector<UDPSocket> sockets;
+    for ( uint16_t port = 1; port != 0; port++ ) {
+      sockets.emplace_back();
+      try {
+        sockets.back().bind( { "0", port } );
+      } catch ( const exception & e ) {
+        /* ... */
+      }
     }
 
-    socket.bind( { "0", port } );
-    poller.add_action( Action( socket,
-                               Direction::In,
-                               [&socket] () {
-                                 auto rec = socket.recv();
-                                 cout << "\tUDP datagram from " << rec.source_address.to_string() << "\n";
-                                 socket.sendto(rec.source_address, rec.source_address.to_string());
-                                 return ResultType::Continue;
-                               } ) );
+    Poller poller;
+    for ( auto & sock : sockets ) {
+      poller.add_action( Action( sock,
+                                 Direction::In,
+                                 [&sock] () {
+                                   auto rec = sock.recv();
+                                   cout << "\tUDP datagram from " << rec.source_address.to_string() << "\n";
+                                   sock.sendto(rec.source_address, rec.source_address.to_string());
+                                   return ResultType::Continue;
+                                 } ) );
+    }
 
     while ( true ) {
       const auto ret = poller.poll( -1 );
