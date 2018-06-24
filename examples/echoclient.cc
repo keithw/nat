@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
   try {
     UDPSocket sock;
-    sock.bind( Address( "0", uint16_t( 60000 ) ) );
+    sock.bind( Address( "0", uint16_t( 50000 ) ) );
     
     Poller poller;
     poller.add_action( Action( sock,
