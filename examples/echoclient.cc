@@ -26,7 +26,8 @@ int main(int argc, char** argv)
 
   try {
     UDPSocket sock;
-
+    sock.bind( Address( "0", uint16_t( 60000 ) ) );
+    
     Poller poller;
     poller.add_action( Action( sock,
                                Direction::In,
@@ -38,21 +39,15 @@ int main(int argc, char** argv)
 
     uint16_t next_port = 60000;
     while ( true ) {
-      for ( int x = 0; x < 16; x++ ) {
-        try {
-          sock.sendto( Address( argv[ECHO_SERVER_IP], next_port ), "ping" );
-          next_port++;
-          if ( next_port >= 61000 ) {
-            next_port = 60000;
-          }
-        } catch ( const unix_error & e ) {
-          if ( e.code().value() == EAGAIN ) {
-            cerr << "(continuing after EAGAIN...)\n";
-          }
+      try {
+        sock.sendto( Address( argv[ECHO_SERVER_IP], next_port ), "ping" );
+      } catch ( const unix_error & e ) {
+        if ( e.code().value() == EAGAIN ) {
+          cerr << "(continuing after EAGAIN...)\n";
         }
       }
         
-      const auto ret = poller.poll( 10 );
+      const auto ret = poller.poll( 100 );
 
       if ( ret.result == PollResult::Exit ) {
         return ret.exit_status;

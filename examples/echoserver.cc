@@ -10,18 +10,18 @@
 using namespace std;
 using namespace PollerShortNames;
 
-int main()
+int main( int argc, char *argv[] )
 {
   try {
-    vector<UDPSocket> sockets;
-    for ( uint16_t port = 1; port != 0; port++ ) {
-      sockets.emplace_back();
-      try {
-        sockets.back().bind( { "0", port } );
-      } catch ( const exception & e ) {
-        /* ... */
-      }
+    if ( argc != 3 ) {
+      abort();
     }
+    
+    vector<UDPSocket> sockets;
+    sockets.emplace_back();
+    sockets.back().bind( { argv[ 1 ], uint16_t{ 60000 } } );
+    sockets.emplace_back();
+    sockets.back().bind( { argv[ 2 ], uint16_t{ 60000 } } );
 
     Poller poller;
     for ( auto & sock : sockets ) {
