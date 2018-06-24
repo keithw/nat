@@ -16,43 +16,35 @@ int main(int argc, char** argv)
   enum Args {
     PROGRAM = 0,
     ECHO_SERVER_IP = 1,
-    ECHO_SERVER_PORT = 2,
-    NUM_ARGS = 3
+    NUM_ARGS = 2
   };
 
   if (argc < NUM_ARGS) {
-    cerr << "Usage: " << argv[0] << " <echo_server> <echo_server_port>" << endl;
+    cerr << "Usage: " << argv[0] << " <echo_server>" << endl;
     return EXIT_FAILURE;
   }
 
   try {
-    Address echo_server( argv[ ECHO_SERVER_IP ], argv[ ECHO_SERVER_PORT ] );
-    vector<UDPSocket> sockets;
-    for ( uint16_t port = 1024; port < 1024 + 512; port++ ) {
-      sockets.emplace_back();
-      try {
-        sockets.back().bind( { "0", port } );
-      } catch ( const exception & e ) {
-        /* ... */
-      }
-    }
+    UDPSocket sock;
 
     Poller poller;
-    for ( auto & sock : sockets ) {
-      poller.add_action( Action( sock,
-                                 Direction::In,
-                                 [&sock] () {
-                                   auto echo = sock.recv().payload;
-                                   cout << sock.local_address().to_string() << " => " << echo << endl;
-                                   return ResultType::Continue;
-                                 } ) );
-    }
+    poller.add_action( Action( sock,
+                               Direction::In,
+                               [&sock] () {
+                                 auto echo = sock.recv();
+                                 cout << sock.local_address().to_string() << " => " << echo.source_address.to_string() << " => " << echo.payload << endl;
+                                 return ResultType::Continue;
+                               } ) );
 
-    unsigned int next_sock = 0;
+    uint16_t next_port = 60000;
     while ( true ) {
       for ( int x = 0; x < 16; x++ ) {
         try {
-          sockets.at( (next_sock++) % sockets.size() ).sendto( echo_server, "ping" );
+          sock.sendto( Address( argv[ECHO_SERVER_IP], next_port ), "ping" );
+          next_port++;
+          if ( next_port >= 61000 ) {
+            next_port = 60000;
+          }
         } catch ( const unix_error & e ) {
           if ( e.code().value() == EAGAIN ) {
             cerr << "(continuing after EAGAIN...)\n";
@@ -60,7 +52,7 @@ int main(int argc, char** argv)
         }
       }
         
-      const auto ret = poller.poll( 1 );
+      const auto ret = poller.poll( 10 );
 
       if ( ret.result == PollResult::Exit ) {
         return ret.exit_status;
