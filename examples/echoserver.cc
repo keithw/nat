@@ -21,7 +21,7 @@ int main( int argc, char *argv[] )
     sockets.emplace_back();
     sockets.back().bind( { argv[ 1 ], uint16_t{ 60000 } } );
     sockets.emplace_back();
-    sockets.back().bind( { argv[ 2 ], uint16_t{ 60000 } } );
+    sockets.back().bind( { argv[ 2 ], uint16_t{ 60100 } } );
 
     Poller poller;
     for ( auto & sock : sockets ) {
