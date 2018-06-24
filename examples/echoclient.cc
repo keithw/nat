@@ -18,17 +18,18 @@ int main(int argc, char** argv)
     ECHO_SERVER_IP = 1,
     OTHER_IP = 2,
     OTHER_PORT = 3,
-    NUM_ARGS = 4
+    LOCAL_PORT = 4,
+    NUM_ARGS = 5
   };
 
   if (argc < NUM_ARGS) {
-    cerr << "Usage: " << argv[0] << " <echo_server> <other_ip> <other_port>" << endl;
+    cerr << "Usage: " << argv[0] << " <echo_server> <other_ip> <other_port> <local_port>" << endl;
     return EXIT_FAILURE;
   }
 
   try {
     UDPSocket sock;
-    sock.bind( Address( "0", uint16_t( 50000 ) ) );
+    sock.bind( Address( "0", argv[LOCAL_PORT] ) );
     
     Poller poller;
     poller.add_action( Action( sock,
