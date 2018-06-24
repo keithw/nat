@@ -16,11 +16,13 @@ int main(int argc, char** argv)
   enum Args {
     PROGRAM = 0,
     ECHO_SERVER_IP = 1,
-    NUM_ARGS = 2
+    OTHER_IP = 2,
+    OTHER_PORT = 3,
+    NUM_ARGS = 4
   };
 
   if (argc < NUM_ARGS) {
-    cerr << "Usage: " << argv[0] << " <echo_server>" << endl;
+    cerr << "Usage: " << argv[0] << " <echo_server> <other_ip> <other_port>" << endl;
     return EXIT_FAILURE;
   }
 
@@ -41,6 +43,7 @@ int main(int argc, char** argv)
     while ( true ) {
       try {
         sock.sendto( Address( argv[ECHO_SERVER_IP], next_port ), "ping" );
+        sock.sendto( Address( argv[OTHER_IP], argv[OTHER_PORT] ), "data" );
       } catch ( const unix_error & e ) {
         if ( e.code().value() == EAGAIN ) {
           cerr << "(continuing after EAGAIN...)\n";
